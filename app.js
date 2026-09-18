@@ -53,7 +53,7 @@ function setMode(mode) {
     } else {
         btnSiniestro.style.cssText = activeStyle;
         btnPlaca.style.cssText     = inactiveStyle;
-        input.placeholder = "SL-000001";
+        input.placeholder = "AF-000001";
         input.maxLength   = 20;
     }
     input.value = '';
@@ -182,7 +182,7 @@ function renderResults() {
                 <svg style="width:1rem;height:1rem;margin-right:.5rem;color:${iconColor};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
                 </svg>
-                ${e.Nro_Siniestro}
+                ${e.Nro_Siniestro_AF}
             </div>`;
         }).join('');
         tabsHtml = `<div style="display:flex;overflow-x:auto;align-items:flex-end;gap:.5rem;padding:0 .5rem;scrollbar-width:none;flex-shrink:0;">${tabs}</div>`;
@@ -200,8 +200,8 @@ function renderResults() {
         </div>
         <div style="flex:1;min-width:0;">
             <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem .75rem;">
-                <h2 style="font-size:.875rem;font-weight:900;font-family:ui-monospace,monospace;letter-spacing:.05em;line-height:1;margin:0;">${exp.Nro_Siniestro}</h2>
-                <span style="font-size:.75rem;opacity:.6;font-family:ui-monospace,monospace;">${exp.Nro_Ajuste}</span>
+                <h2 style="font-size:.875rem;font-weight:900;font-family:ui-monospace,monospace;letter-spacing:.05em;line-height:1;margin:0;">${exp.Nro_Siniestro_AF}</h2>
+                <span style="font-size:.75rem;opacity:.6;font-family:ui-monospace,monospace;">${exp.Nro_Siniestro_SW}</span>
             </div>
             <p style="font-size:.75rem;color:#dbeafe;display:flex;flex-wrap:wrap;gap:.4rem .75rem;margin:.25rem 0 0;font-weight:500;">
                 <span>${vehiculo}</span>
@@ -233,7 +233,7 @@ function renderResults() {
     /* --- FILTRO + TABLA DE DOCUMENTOS ------------------------------ */
     const docs       = exp.Documentos || [];
     const hasMulti   = docs.length > 1;
-    const adjId      = exp.Nro_Siniestro.replace(/[^a-z0-9]/gi, '_');
+    const adjId      = exp.Nro_Siniestro_AF.replace(/[^a-z0-9]/gi, '_');
 
     const filterRow  = hasMulti ? `
         <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;justify-content:space-between;align-items:center;">

@@ -6,8 +6,8 @@
  *   Response: ver estructura completa debajo
  *
  * Placas de prueba : GAV99R · ABC123 · MMM777 · ZZZ111 · RRR444
- * Siniestros de prueba: SL-000001 · SL-000125 · SL-000201 · SL-000303
- *                       SL-000401 · SL-000402 · SL-000403 · SL-000555
+ * Siniestros de prueba: AF-000001 · AF-000125 · AF-000201 · AF-000303
+ *                       AF-000401 · AF-000402 · AF-000403 · AF-000555
  */
 
 const _BASE_URL = "http://208.109.245.130/AutoFast/reclg03.nsf/0/";
@@ -39,8 +39,8 @@ const _SCENARIOS = {
             SerialCarroceria: "8Y4FJ67V9X1828197",
             Expedientes: [
                 {
-                    Nro_Siniestro: "SL-000001",
-                    Nro_Ajuste: "AJ-000001",
+                    Nro_Siniestro_AF: "AF-000001",
+                    Nro_Siniestro_SW: "SW-2026-000001",
                     Fecha_Accidente: "2026-08-15",
                     Fecha_Notificacion: "2026-08-16",
                     Estados_WorkFlow: [
@@ -76,8 +76,8 @@ const _SCENARIOS = {
             SerialCarroceria: "8XTCF31F9FG004261",
             Expedientes: [
                 {
-                    Nro_Siniestro: "SL-000125",
-                    Nro_Ajuste: "AJ-000125",
+                    Nro_Siniestro_AF: "AF-000125",
+                    Nro_Siniestro_SW: "SW-2026-000125",
                     Fecha_Accidente: "2026-03-10",
                     Fecha_Notificacion: "2026-03-11",
                     Estados_WorkFlow: [
@@ -93,8 +93,8 @@ const _SCENARIOS = {
                     ]
                 },
                 {
-                    Nro_Siniestro: "SL-000201",
-                    Nro_Ajuste: "AJ-000201",
+                    Nro_Siniestro_AF: "AF-000201",
+                    Nro_Siniestro_SW: "SW-2026-000201",
                     Fecha_Accidente: "2026-04-22",
                     Fecha_Notificacion: "2026-04-23",
                     Estados_WorkFlow: [
@@ -139,8 +139,8 @@ const _SCENARIOS = {
             SerialCarroceria: "KL1TJ52643B208833",
             Expedientes: [
                 {
-                    Nro_Siniestro: "SL-000303",
-                    Nro_Ajuste: "AJ-000303",
+                    Nro_Siniestro_AF: "AF-000303",
+                    Nro_Siniestro_SW: "SW-2026-000303",
                     Fecha_Accidente: "2026-07-01",
                     Fecha_Notificacion: "2026-07-02",
                     Estados_WorkFlow: [
@@ -161,7 +161,7 @@ const _SCENARIOS = {
 
     /* ------------------------------------------------------------------
        ESCENARIO 4: ZZZ111
-       3 expedientes (tabs: SL-401, SL-402, SL-403)
+       3 expedientes (tabs: AF-401, AF-402, AF-403)
        Muestra navegación entre múltiples siniestros en la misma póliza
     ------------------------------------------------------------------ */
     "PLACA:ZZZ111": {
@@ -180,8 +180,8 @@ const _SCENARIOS = {
             SerialCarroceria: "1FMSK7FH9HGA01234",
             Expedientes: [
                 {
-                    Nro_Siniestro: "SL-000401",
-                    Nro_Ajuste: "AJ-000401",
+                    Nro_Siniestro_AF: "AF-000401",
+                    Nro_Siniestro_SW: "SW-2025-000401",
                     Fecha_Accidente: "2025-12-15",
                     Fecha_Notificacion: "2025-12-16",
                     Estados_WorkFlow: [
@@ -193,8 +193,8 @@ const _SCENARIOS = {
                     ]
                 },
                 {
-                    Nro_Siniestro: "SL-000402",
-                    Nro_Ajuste: "AJ-000402",
+                    Nro_Siniestro_AF: "AF-000402",
+                    Nro_Siniestro_SW: "SW-2026-000402",
                     Fecha_Accidente: "2026-02-20",
                     Fecha_Notificacion: "2026-02-21",
                     Estados_WorkFlow: [
@@ -209,8 +209,8 @@ const _SCENARIOS = {
                     ]
                 },
                 {
-                    Nro_Siniestro: "SL-000403",
-                    Nro_Ajuste: "AJ-000403",
+                    Nro_Siniestro_AF: "AF-000403",
+                    Nro_Siniestro_SW: "SW-2026-000403",
                     Fecha_Accidente: "2026-06-05",
                     Fecha_Notificacion: "2026-06-06",
                     Estados_WorkFlow: [
@@ -245,8 +245,8 @@ const _SCENARIOS = {
             SerialCarroceria: "3N1AB7AP5JL658921",
             Expedientes: [
                 {
-                    Nro_Siniestro: "SL-000555",
-                    Nro_Ajuste: "AJ-000555",
+                    Nro_Siniestro_AF: "AF-000555",
+                    Nro_Siniestro_SW: "SW-2026-000555",
                     Fecha_Accidente: "2026-05-10",
                     Fecha_Notificacion: "2026-05-11",
                     Estados_WorkFlow: [
@@ -270,25 +270,25 @@ const _SCENARIOS = {
 
 /* =====================================================================
    ÍNDICE PARA BÚSQUEDA POR SINIESTRO
-   Mapea Nro_Siniestro / Nro_Ajuste → clave de escenario
+   Mapea Nro_Siniestro_AF / Nro_Siniestro_SW → clave de escenario
    ===================================================================== */
 const _SIN_INDEX = {
-    "SL-000001":     "PLACA:GAV99R",
-    "AJ-000001":"PLACA:GAV99R",
-    "SL-000125":     "PLACA:ABC123",
-    "AJ-000125":"PLACA:ABC123",
-    "SL-000201":     "PLACA:ABC123",
-    "AJ-000201":"PLACA:ABC123",
-    "SL-000303":     "PLACA:MMM777",
-    "AJ-000303":"PLACA:MMM777",
-    "SL-000401":     "PLACA:ZZZ111",
-    "AJ-000401":"PLACA:ZZZ111",
-    "SL-000402":     "PLACA:ZZZ111",
-    "AJ-000402":"PLACA:ZZZ111",
-    "SL-000403":     "PLACA:ZZZ111",
-    "AJ-000403":"PLACA:ZZZ111",
-    "SL-000555":     "PLACA:RRR444",
-    "AJ-000555":"PLACA:RRR444"
+    "AF-000001":     "PLACA:GAV99R",
+    "SW-2026-000001":"PLACA:GAV99R",
+    "AF-000125":     "PLACA:ABC123",
+    "SW-2026-000125":"PLACA:ABC123",
+    "AF-000201":     "PLACA:ABC123",
+    "SW-2026-000201":"PLACA:ABC123",
+    "AF-000303":     "PLACA:MMM777",
+    "SW-2026-000303":"PLACA:MMM777",
+    "AF-000401":     "PLACA:ZZZ111",
+    "SW-2025-000401":"PLACA:ZZZ111",
+    "AF-000402":     "PLACA:ZZZ111",
+    "SW-2026-000402":"PLACA:ZZZ111",
+    "AF-000403":     "PLACA:ZZZ111",
+    "SW-2026-000403":"PLACA:ZZZ111",
+    "AF-000555":     "PLACA:RRR444",
+    "SW-2026-000555":"PLACA:RRR444"
 };
 
 /* =====================================================================
@@ -327,8 +327,8 @@ function _process(request) {
             const sc = _SCENARIOS[scKey];
             // Filtrar solo el expediente que corresponde al número consultado
             const exps = sc.Polizas.Expedientes.filter(
-                e => e.Nro_Siniestro.toUpperCase() === valor ||
-                     e.Nro_Ajuste.toUpperCase() === valor
+                e => e.Nro_Siniestro_AF.toUpperCase() === valor ||
+                     e.Nro_Siniestro_SW.toUpperCase() === valor
             );
             if (exps.length > 0) {
                 return { ...sc, Polizas: { ...sc.Polizas, Expedientes: exps } };
