@@ -1,137 +1,637 @@
-<!DOCTYPE html>
-<html lang="es" class="h-full">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consulta de Estatus de Siniestros | Seguros Mercantil</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body class="h-full flex flex-col overflow-hidden">
+<title>Consulta de Siniestros</title>
+<style>
+/* Reset base */
+*, ::before, ::after { box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e2e8f0; }
+body { margin: 0; padding: 0 !important; background: #f5f5f7; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1d1d1f; }
+input, button { font-family: inherit; font-size: 100%; line-height: inherit; margin: 0; padding: 0; background: transparent; color: inherit; cursor: pointer; }
+input { border-width: 1px; }
+input:focus { outline: none; }
+table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
 
-    <!-- HEADER -->
-    <header class="sticky top-0 z-50 mercantil-gradient text-white shadow-md border-b border-white/10 shrink-0">
-        <div class="max-w-7xl mx-auto px-4 h-14 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <div class="bg-white px-2.5 py-1.5 rounded-lg shadow-sm flex items-center">
-                    <img src="https://www.mercantilseguros.com/_next/image?url=https%3A%2F%2Fd54puq9p05rso.cloudfront.net%2Flanding%2Fimages%2Fweb%2Fcentenary-logo.png&w=256&q=75" alt="Mercantil Seguros" class="h-8 w-auto object-contain">
-                </div>
-                <div class="hidden sm:block border-l border-blue-400/40 pl-3">
-                    <h1 class="text-sm font-semibold tracking-wide text-white">Consulta de Estatus de Siniestros</h1>
-                </div>
-            </div>
-            <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white">
-                    <svg class="w-5 h-5 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                </div>
-            </div>
+/* =====================================================================
+   LAYOUT PRINCIPAL — position:fixed cubre el viewport sin depender del skeleton
+   ===================================================================== */
+#app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #f5f5f7;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+#app > header  { flex-shrink: 0; }
+#app > footer  { flex-shrink: 0; }
+#app > main    { flex: 1 1 0%; min-height: 0; overflow: hidden; display: flex; flex-direction: column; padding: 0.75rem 1rem; max-width: 80rem; width: 100%; margin: 0 auto; align-self: stretch; }
+
+/* Results section fills remaining height */
+#results-container { flex: 1 1 0%; min-height: 0; display: flex; flex-direction: column; margin-top: 0.75rem; }
+
+/* Componentes */
+.mercantil-gradient { background: linear-gradient(135deg, #002b66 0%, #004b87 100%); }
+.apple-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px -2px rgba(0,0,0,.05); border: 1px solid rgba(226,232,240,.8); }
+.swiper-native-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; scroll-behavior: smooth; }
+.swiper-native-container::-webkit-scrollbar { display: none; }
+.swiper-native-slide { scroll-snap-align: start; flex-shrink: 0; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] summary ~ * { animation: fadeIn .2s ease-in-out; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Utilidades de layout */
+.flex   { display: flex; }   .block  { display: block; }  .hidden { display: none; }
+.flex-col   { flex-direction: column; }
+.flex-wrap  { flex-wrap: wrap; }
+.flex-1     { flex: 1 1 0%; }
+.shrink-0   { flex-shrink: 0; }
+.min-h-0    { min-height: 0; }
+.items-center   { align-items: center; }
+.items-start    { align-items: flex-start; }
+.items-end      { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between{ justify-content: space-between; }
+.justify-end    { justify-content: flex-end; }
+
+/* Espaciado */
+.m-0{margin:0}.mx-auto{margin-left:auto;margin-right:auto}
+.mt-1{margin-top:.25rem}.mt-3{margin-top:.75rem}.mb-1{margin-bottom:.25rem}.-mb-px{margin-bottom:-1px}
+.ml-1{margin-left:.25rem}.ml-2{margin-left:.5rem}.mr-1{margin-right:.25rem}.mr-2{margin-right:.5rem}
+.p-1{padding:.25rem}.p-1\.5{padding:.375rem}.p-2{padding:.5rem}.p-3{padding:.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}
+.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}
+.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}
+.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}
+.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}
+.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}
+.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}
+.pb-2{padding-bottom:.5rem}.pb-2\.5{padding-bottom:.625rem}.pb-3{padding-bottom:.75rem}
+.pt-1{padding-top:.25rem}.pt-2{padding-top:.5rem}.pt-2\.5{padding-top:.625rem}.pt-3{padding-top:.75rem}
+.pl-3{padding-left:.75rem}.pl-9{padding-left:2.25rem}.pl-10{padding-left:2.5rem}
+.pr-3{padding-right:.75rem}.pr-9{padding-right:2.25rem}
+
+/* Gaps */
+.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}
+.space-x-2>*+*{margin-left:.5rem}.space-x-3>*+*{margin-left:.75rem}.space-x-4>*+*{margin-left:1rem}
+.space-y-2>*+*{margin-top:.5rem}
+
+/* Tamaños */
+.w-full{width:100%}.h-full{height:100%}.w-fit{width:fit-content}
+.w-3\.5{width:.875rem}.h-3\.5{height:.875rem}.w-4{width:1rem}.h-4{height:1rem}
+.w-5{width:1.25rem}.h-5{height:1.25rem}.w-6{width:1.5rem}.h-6{height:1.5rem}
+.w-8{width:2rem}.h-8{height:2rem}.w-9{width:2.25rem}.h-9{height:2.25rem}
+.w-10{width:2.5rem}.h-10{height:2.5rem}.h-14{height:3.5rem}
+.max-w-sm{max-width:24rem}.max-w-2xl{max-width:42rem}.max-w-7xl{max-width:80rem}
+.min-h-\[200px\]{min-height:200px}
+
+/* Posicionamiento */
+.relative{position:relative}.absolute{position:absolute}.fixed{position:fixed}.sticky{position:sticky}
+.inset-0{top:0;right:0;bottom:0;left:0}.top-0{top:0}.left-3{left:.75rem}.right-2{right:.5rem}
+.z-10{z-index:10}.z-40{z-index:40}.z-50{z-index:50}.z-\[60\]{z-index:60}
+
+/* Tipografía */
+.text-xs{font-size:.75rem;line-height:1rem}.text-sm{font-size:.875rem;line-height:1.25rem}
+.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}
+.font-medium{font-weight:500}.font-semibold{font-weight:600}.font-bold{font-weight:700}.font-black{font-weight:900}.font-extrabold{font-weight:800}
+.uppercase{text-transform:uppercase}.tracking-tight{letter-spacing:-.025em}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}
+.text-center{text-align:center}.text-right{text-align:right}
+.whitespace-nowrap{white-space:nowrap}.leading-none{line-height:1}.leading-snug{line-height:1.375}.leading-relaxed{line-height:1.625}
+.font-mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Courier New",monospace}
+
+/* Colores de fondo */
+.bg-white{background-color:#fff}.bg-transparent{background-color:transparent}
+.bg-slate-50{background-color:#f8fafc}.bg-slate-100{background-color:#f1f5f9}.bg-slate-200{background-color:#e2e8f0}
+.bg-blue-50{background-color:#eff6ff}.bg-blue-100{background-color:#dbeafe}
+.bg-black\/10{background-color:rgba(0,0,0,.1)}.bg-slate-900\/40{background-color:rgba(15,23,42,.4)}.bg-white\/10{background-color:rgba(255,255,255,.1)}
+.bg-\[\#002b66\]{background-color:#002b66}
+
+/* Colores de texto */
+.text-white{color:#fff}.text-black{color:#000}
+.text-slate-400{color:#94a3b8}.text-slate-500{color:#64748b}.text-slate-600{color:#475569}
+.text-slate-700{color:#334155}.text-slate-800{color:#1e293b}.text-slate-900{color:#0f172a}
+.text-blue-100{color:#dbeafe}.text-blue-600{color:#2563eb}.text-blue-700{color:#1d4ed8}.text-blue-800{color:#1e40af}.text-blue-900{color:#1e3a8a}
+.text-rose-600{color:#e11d48}.text-emerald-700{color:#047857}.text-emerald-600{color:#059669}
+
+/* Bordes */
+.border{border-width:1px}.border-t{border-top-width:1px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}
+.border-t-2{border-top-width:2px}.border-x{border-left-width:1px;border-right-width:1px}.border-t-0{border-top-width:0}
+.border-slate-100{border-color:#f1f5f9}.border-slate-200{border-color:#e2e8f0}.border-slate-300{border-color:#cbd5e1}
+.border-blue-100{border-color:#dbeafe}.border-blue-200{border-color:#bfdbfe}.border-blue-300{border-color:#93c5fd}
+.border-blue-400\/40{border-color:rgba(96,165,250,.4)}.border-white\/10{border-color:rgba(255,255,255,.1)}.border-white\/20{border-color:rgba(255,255,255,.2)}
+.rounded-md{border-radius:.375rem}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.rounded-full{border-radius:9999px}
+.rounded-t-lg{border-top-left-radius:.5rem;border-top-right-radius:.5rem}.rounded-t-xl{border-top-left-radius:.75rem;border-top-right-radius:.75rem}
+.rounded-tl-none{border-top-left-radius:0}.rounded-tr-xl{border-top-right-radius:.75rem}
+.divide-y>:not([hidden])~:not([hidden]){border-top-width:1px;border-color:#f1f5f9}
+
+/* Sombras y efectos */
+.shadow-sm{box-shadow:0 1px 2px 0 rgba(0,0,0,.05)}.shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,.1)}
+.shadow-2xl{box-shadow:0 25px 50px -12px rgba(0,0,0,.25)}.shadow-inner{box-shadow:inset 0 2px 4px 0 rgba(0,0,0,.06)}
+.shadow-\[0_-4px_10px_rgba\(0\,0\,0\,0\.05\)\]{box-shadow:0 -4px 10px rgba(0,0,0,.05)}
+.shadow-\[0_-2px_8px_rgba\(0\,0\,0\,0\.06\)\]{box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.ring-1{box-shadow:0 0 0 1px #e2e8f0}
+.opacity-50{opacity:.5}.opacity-90{opacity:.9}.backdrop-blur-sm{backdrop-filter:blur(4px)}
+.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.overflow-x-auto{overflow-x:auto}.object-contain{object-fit:contain}
+.pointer-events-none{pointer-events:none}.select-none{user-select:none}
+.transition-all{transition:all .15s cubic-bezier(.4,0,.2,1)}.transition-colors{transition:color,background-color,border-color .15s cubic-bezier(.4,0,.2,1)}
+
+/* Hover */
+.hover\:bg-slate-50:hover{background-color:#f8fafc}.hover\:bg-slate-100:hover{background-color:#f1f5f9}.hover\:bg-slate-300:hover{background-color:#cbd5e1}
+.hover\:bg-blue-100:hover{background-color:#dbeafe}.hover\:bg-blue-200:hover{background-color:#bfdbfe}
+.hover\:bg-\[\#001f4d\]:hover{background-color:#001f4d}.hover\:bg-black\/20:hover{background-color:rgba(0,0,0,.2)}
+.hover\:text-slate-600:hover{color:#475569}.hover\:text-slate-700:hover{color:#334155}.hover\:text-blue-900:hover{color:#1e3a8a}
+
+/* Focus */
+.focus\:border-blue-500:focus{border-color:#3b82f6}.focus\:border-blue-400:focus{border-color:#60a5fa}
+.focus\:ring-1:focus{box-shadow:0 0 0 1px #3b82f6}
+
+/* Colores de estatus */
+.bg-amber-400{background-color:#fbbf24}.border-amber-500{border-color:#f59e0b}
+.bg-orange-500{background-color:#f97316}.border-orange-600{border-color:#ea580c}
+.bg-indigo-600{background-color:#4f46e5}.border-indigo-700{border-color:#4338ca}
+.bg-cyan-600{background-color:#0891b2}.border-cyan-700{border-color:#0e7490}
+.bg-blue-600{background-color:#2563eb}.border-blue-700{border-color:#1d4ed8}
+.bg-teal-600{background-color:#0d9488}.border-teal-700{border-color:#0f766e}
+.bg-emerald-600{background-color:#059669}.border-emerald-700{border-color:#047857}
+.bg-rose-600{background-color:#e11d48}.border-rose-700{border-color:#be123c}
+.bg-fuchsia-600{background-color:#c026d3}.border-fuchsia-700{border-color:#a21caf}
+.bg-purple-600{background-color:#9333ea}.border-purple-700{border-color:#7e22ce}
+.bg-slate-500{background-color:#64748b}.border-slate-600{border-color:#475569}
+
+/* Responsive */
+@media(min-width:640px){
+    .sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}.sm\:justify-between{justify-content:space-between}
+    .sm\:max-w-\[280px\]{max-width:280px}.sm\:w-36{width:9rem}.sm\:block{display:block}
+}
+@media(min-width:768px){
+    .md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:w-auto{width:auto}
+    .md\:w-\[320px\]{width:20rem}.md\:px-4{padding-left:1rem;padding-right:1rem}.md\:px-5{padding-left:1.25rem;padding-right:1.25rem}
+    .md\:p-4{padding:1rem}.md\:gap-3{gap:.75rem}.md\:gap-4{gap:1rem}
+    .md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:.875rem;line-height:1.25rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}
+    .md\:h-10{height:2.5rem}.md\:w-10{width:2.5rem}.md\:h-6{height:1.5rem}.md\:w-6{width:1.5rem}.md\:h-5{height:1.25rem}.md\:w-5{width:1.25rem}
+    .md\:py-3{padding-top:.75rem;padding-bottom:.75rem}
+}
+@media(max-width:640px){
+    #app>main{padding:.5rem}
+}
+</style>
+
+<!-- ===== ESTRUCTURA PRINCIPAL ===== -->
+<div id="app">
+
+  <!-- HEADER -->
+  <header style="background:linear-gradient(135deg,#002b66 0%,#004b87 100%);color:#fff;box-shadow:0 4px 6px -1px rgba(0,0,0,.1);border-bottom:1px solid rgba(255,255,255,.1);">
+    <div style="max-width:80rem;margin:0 auto;padding:0 1rem;height:3.5rem;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div style="background:#fff;padding:.375rem .625rem;border-radius:.5rem;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);display:flex;align-items:center;">
+          <svg width="110" height="30" viewBox="0 0 110 30" fill="none">
+            <text x="2" y="20" font-family="Arial,sans-serif" font-weight="900" font-size="14" fill="#002b66">MERCANTIL</text>
+            <text x="2" y="28" font-family="Arial,sans-serif" font-size="7" fill="#004b87" letter-spacing="2">SEGUROS</text>
+          </svg>
         </div>
-    </header>
+        <div style="border-left:1px solid rgba(96,165,250,.4);padding-left:.75rem;display:none;" class="sm:block">
+          <h1 style="font-size:.875rem;font-weight:600;letter-spacing:.025em;color:#fff;margin:0;">Consulta de Estatus de Siniestros</h1>
+        </div>
+      </div>
+      <div style="width:2rem;height:2rem;border-radius:9999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;">
+        <svg style="width:1.25rem;height:1.25rem;opacity:.9;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+        </svg>
+      </div>
+    </div>
+  </header>
 
-    <!-- MAIN -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-2 md:px-4 py-3 flex flex-col min-h-0">
+  <!-- MAIN -->
+  <main>
+    <!-- Barra de búsqueda -->
+    <section style="background:#fff;padding:.75rem;border-radius:.75rem;border:1px solid #e2e8f0;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);display:flex;flex-direction:column;gap:.75rem;flex-shrink:0;">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;">
 
-        <!-- Barra de búsqueda -->
-        <section class="bg-white p-3 md:p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3 shrink-0">
-            <div class="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+        <!-- Toggle Placa / Siniestro -->
+        <div style="display:flex;background:#f1f5f9;padding:.25rem;border-radius:.5rem;border:1px solid #e2e8f0;flex-shrink:0;">
+          <button id="btn-mode-placa" data-action="setMode" data-mode="placa"
+            style="padding:.375rem 1rem;font-size:.875rem;font-weight:700;border-radius:.375rem;background:#fff;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);color:#1d4ed8;border:1px solid #e2e8f0;transition:all .15s;">Placa</button>
+          <button id="btn-mode-siniestro" data-action="setMode" data-mode="siniestro"
+            style="padding:.375rem 1rem;font-size:.875rem;font-weight:500;border-radius:.375rem;color:#64748b;border:0;transition:all .15s;">Siniestro</button>
+        </div>
 
-                <!-- Selector de modo -->
-                <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0 w-fit">
-                    <button id="btn-mode-placa" data-action="setMode" data-mode="placa" class="px-4 py-1.5 text-sm font-bold rounded-md bg-white shadow-sm text-blue-700 border border-slate-200 transition-all">Placa</button>
-                    <button id="btn-mode-siniestro" data-action="setMode" data-mode="siniestro" class="px-4 py-1.5 text-sm font-medium rounded-md text-slate-500 hover:text-slate-700 transition-all">Siniestro</button>
-                </div>
+        <!-- Input y botón -->
+        <div style="display:flex;align-items:center;gap:.5rem;flex:1;min-width:0;">
+          <div style="position:relative;flex:1;max-width:20rem;display:flex;align-items:center;">
+            <svg style="position:absolute;left:.75rem;width:1.25rem;height:1.25rem;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+            <input type="text" id="search-input" value="ABC123" placeholder="ABC123" maxlength="6"
+              style="width:100%;padding:.5rem 2.25rem .5rem 2.5rem;background:#fff;border:1px solid #cbd5e1;border-radius:.5rem;font-size:1rem;font-family:ui-monospace,monospace;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#0f172a;transition:border-color .15s;"
+              onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#cbd5e1'">
+            <button data-action="clearSearch" title="Limpiar"
+              style="position:absolute;right:.5rem;color:#94a3b8;padding:.375rem;border-radius:9999px;border:0;display:flex;align-items:center;justify-content:center;">
+              <svg style="width:1rem;height:1rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <button data-action="executeSearch"
+            style="background:#002b66;color:#fff;padding:.5rem 1.5rem;border-radius:.5rem;font-weight:700;font-size:.875rem;text-transform:uppercase;letter-spacing:.025em;border:0;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);flex-shrink:0;transition:background .15s;"
+            onmouseover="this.style.background='#001f4d'" onmouseout="this.style.background='#002b66'">
+            Buscar
+          </button>
+        </div>
+      </div>
 
-                <!-- Input y botón buscar -->
-                <div class="flex items-center gap-2 w-full md:w-auto flex-1">
-                    <div class="relative w-full md:w-[320px] flex items-center">
-                        <svg class="absolute left-3 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                        <input type="text" id="search-input" value="ABC123" placeholder="ABC123" maxlength="6"
-                            class="w-full pl-10 pr-9 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-base font-mono font-bold uppercase tracking-wider text-slate-900">
-                        <button data-action="clearSearch" title="Limpiar"
-                            class="absolute right-2 text-slate-400 hover:text-slate-600 p-1.5 transition-colors rounded-full hover:bg-slate-100">
-                            <svg class="w-4 h-4 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <button data-action="executeSearch"
-                        class="bg-[#002b66] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#001f4d] transition-all shadow-sm shrink-0 text-sm md:text-base uppercase">
-                        Buscar
+      <!-- Mensaje de estado -->
+      <div id="status-message-container" style="display:none;align-items:center;padding-top:.5rem;">
+        <span id="status-message" style="font-size:.875rem;font-weight:500;display:flex;align-items:center;gap:.375rem;"></span>
+      </div>
+    </section>
+
+    <!-- Resultados -->
+    <section id="results-container"></section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer style="background:linear-gradient(135deg,#002b66 0%,#004b87 100%);color:#dbeafe;padding:.625rem 1rem;text-align:center;font-size:.75rem;font-weight:500;letter-spacing:.025em;">
+    <p style="margin:0;">Mercantil Seguros | Consulta de Estatus de Siniestros - AutoFast / SAM</p>
+  </footer>
+
+</div><!-- /#app -->
+
+<!-- MODAL: Ayuda de estatus -->
+<div id="modal-status-help" style="position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:.75rem;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);max-width:24rem;width:100%;border:1px solid #e2e8f0;overflow:hidden;">
+    <div style="background:#eff6ff;border-bottom:1px solid #dbeafe;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;">
+      <div style="display:flex;align-items:flex-start;gap:.75rem;">
+        <svg style="width:1.5rem;height:1.5rem;color:#2563eb;flex-shrink:0;margin-top:.125rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <h4 style="font-size:.75rem;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin:0 0 .25rem;">Significado del Estatus</h4>
+          <h3 id="modal-status-title" style="font-weight:900;font-size:.875rem;color:#0f172a;line-height:1.375;margin:0;"></h3>
+        </div>
+      </div>
+      <button data-action="closeStatusHelp" style="width:2rem;height:2rem;flex-shrink:0;border-radius:9999px;background:rgba(219,234,254,.5);display:flex;align-items:center;justify-content:center;border:0;color:#1e40af;cursor:pointer;">
+        <svg style="width:1.25rem;height:1.25rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div style="padding:1.25rem;background:#fff;">
+      <p id="modal-status-desc" style="color:#475569;font-size:.875rem;line-height:1.625;font-weight:500;margin:0;"></p>
+    </div>
+    <div style="background:#f8fafc;padding:.75rem 1.25rem;border-top:1px solid #f1f5f9;display:flex;justify-content:flex-end;">
+      <button data-action="closeStatusHelp" style="background:#fff;border:1px solid #cbd5e1;color:#334155;padding:.5rem 1.25rem;border-radius:.5rem;font-size:.875rem;font-weight:700;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);cursor:pointer;">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Visor de documento -->
+<div id="modal-doc" style="position:fixed;inset:0;background:rgba(15,23,42,.4);backdrop-filter:blur(4px);z-index:50;display:none;align-items:center;justify-content:center;padding:1rem;">
+  <div style="background:#fff;border-radius:.75rem;box-shadow:0 25px 50px -12px rgba(0,0,0,.25);max-width:42rem;width:100%;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0;">
+    <div style="background:#f8fafc;border-bottom:1px solid #e2e8f0;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;">
+      <h3 id="modal-doc-title" style="font-weight:700;font-size:1rem;color:#1e293b;display:flex;align-items:center;gap:.5rem;margin:0;"></h3>
+      <button data-action="closeDoc" style="width:2rem;height:2rem;border-radius:9999px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;border:0;color:#475569;cursor:pointer;">
+        <svg style="width:1.25rem;height:1.25rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="modal-doc-body" style="padding:1.25rem;overflow-y:auto;flex:1;background:#fff;"></div>
+    <div style="background:#f8fafc;padding:.75rem 1.25rem;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;">
+      <button data-action="printDoc" style="background:linear-gradient(135deg,#002b66 0%,#004b87 100%);color:#fff;padding:.625rem 1.25rem;border-radius:.5rem;font-size:.875rem;font-weight:700;border:0;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);display:flex;align-items:center;gap:.5rem;cursor:pointer;">
+        <svg style="width:1.25rem;height:1.25rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        Imprimir / PDF
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const claimsDatabase = [
+    {
+        placa: "ABC123",
+        siniestros: [
+            {
+                numero: "RCV-240819-111137",
+                poliza: "02-01-1234-10",
+                fechaRegistro: "15/03/2026",
+                vehiculo: "Toyota Corolla XEI 2020",
+                ajustes: [
+                    {
+                        id: "AJU-00125",
+                        estatus: ["PENDIENTE POR SOLICITAR AJUSTE"],
+                        documentos: [{ titulo: "Declaración del Siniestro" }]
+                    },
+                    {
+                        id: "AJU-00126",
+                        estatus: ["PENDIENTE POR FACTURA DE REPARACIÓN", "PENDIENTE POR COMPRAS DE REPUESTOS"],
+                        documentos: [
+                            { titulo: "Declaración del Siniestro" },
+                            { titulo: "Solicitud del Ajuste" },
+                            { titulo: "Ajuste" },
+                            { titulo: "Dictamen" },
+                            { titulo: "Orden de Reparación" }
+                        ]
+                    }
+                ]
+            },
+            {
+                numero: "RCV-240819-222288",
+                poliza: "02-01-1234-10",
+                fechaRegistro: "02/05/2026",
+                vehiculo: "Toyota Corolla XEI 2020",
+                ajustes: [
+                    {
+                        id: "AJU-00201",
+                        estatus: ["PENDIENTE POR SOLICITUD DE PAGO DE FACTURA DE REPARACIÓN", "PENDIENTE POR SOLICITUD DE PAGO FACTURA DE COMPRA DE REPUESTOS"],
+                        documentos: [
+                            { titulo: "Declaración del Siniestro" }, { titulo: "Solicitud del Ajuste" }, { titulo: "Ajuste" },
+                            { titulo: "Dictamen" }, { titulo: "Orden de Reparación" }, { titulo: "Factura de Reparación" },
+                            { titulo: "Solicitud de Pago de Factura de Reparación" }, { titulo: "Orden de Compra de Repuestos" },
+                            { titulo: "Factura de Repuestos" }, { titulo: "Solicitud de Pago de Factura de Compra de Repuestos" }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+];
+
+let currentMode = 'placa';
+let lastFoundSiniestros = [];
+let activeSiniestroIndex = 0;
+
+const statusDefinitions = {
+    "PENDIENTE POR SOLICITAR AJUSTE": "Significa que todavía el analista y el asegurado no han coordinado la visita con Perito Mercantil para el levantamiento de daños del siniestro.",
+    "PENDIENTE POR AJUSTE": "Significa que ya ha sido coordinado el levantamiento de daños con el Perito Mercantil, tal como se vé en el documento 'solicitud de ajuste'.",
+    "PENDIENTE POR DICTAMEN": "Significa que el caso espera por la decisión del analista de siniestros del SAM, basada en la declaración y los datos levantados en el ajuste respectivo.",
+    "PENDIENTE POR COTIZACIONES DE REPUESTOS": "El caso se encuentra a la espera de la recepción y evaluación de las cotizaciones de los repuestos necesarios.",
+    "PENDIENTE POR ORDEN DE REPARACIÓN": "Significa que ya ha sido emitido Dictamen por parte del analista SAM y solo falta traducir las decisiones tomadas a su forma transaccional en órdenes respectivas.",
+    "PENDIENTE POR FACTURA DE REPARACIÓN": "Se encuentra a la espera de recibir la factura correspondiente a los trabajos de reparación autorizados (puede ser parcial).",
+    "PENDIENTE POR SOLICITUD DE PAGO DE FACTURA DE REPARACIÓN": "Recibidas las facturas de reparación y solo en espera por solicitar y emitir sus pagos respectivos.",
+    "PENDIENTE POR COMPRAS DE REPUESTOS": "Aún no ha sido emitida al menos una compra de los repuestos listados en el respectivo Ajuste (pueden ser parciales).",
+    "PENDIENTE POR FACTURA DE REPUESTOS": "Se encuentra a la espera de recibir la factura por parte del proveedor de los repuestos comprados.",
+    "PENDIENTE POR SOLICITUD DE PAGO FACTURA DE COMPRA DE REPUESTOS": "Recibidas las facturas de repuestos y solo en espera por solicitar y emitir sus pagos respectivos."
+};
+
+function setMode(mode) {
+    currentMode = mode;
+    const btnPlaca = document.getElementById('btn-mode-placa');
+    const btnSiniestro = document.getElementById('btn-mode-siniestro');
+    const input = document.getElementById('search-input');
+    const activeStyle = "padding:.375rem 1rem;font-size:.875rem;font-weight:700;border-radius:.375rem;background:#fff;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);color:#1d4ed8;border:1px solid #e2e8f0;transition:all .15s;cursor:pointer;";
+    const inactiveStyle = "padding:.375rem 1rem;font-size:.875rem;font-weight:500;border-radius:.375rem;color:#64748b;border:0;transition:all .15s;cursor:pointer;background:transparent;";
+    if (mode === 'placa') {
+        btnPlaca.style.cssText = activeStyle;
+        btnSiniestro.style.cssText = inactiveStyle;
+        input.placeholder = "ABC123"; input.maxLength = 6; input.value = "ABC123";
+    } else {
+        btnSiniestro.style.cssText = activeStyle;
+        btnPlaca.style.cssText = inactiveStyle;
+        input.placeholder = "RCV-240819..."; input.maxLength = 15; input.value = "RCV-240819-111137";
+    }
+    input.focus();
+    document.getElementById('status-message-container').style.display = 'none';
+    document.getElementById('results-container').innerHTML = '';
+}
+
+function clearSearch() {
+    const input = document.getElementById('search-input');
+    input.value = ''; input.focus();
+    document.getElementById('status-message-container').style.display = 'none';
+    document.getElementById('results-container').innerHTML = '';
+}
+
+function executeSearch() {
+    const query = document.getElementById('search-input').value.trim().toUpperCase();
+    const msgContainer = document.getElementById('status-message-container');
+    const msgEl = document.getElementById('status-message');
+    const container = document.getElementById('results-container');
+    if (!query) {
+        msgContainer.style.display = 'flex';
+        msgEl.innerHTML = `<span style="color:#e11d48;font-weight:500;">Ingresa un término de búsqueda válido.</span>`;
+        container.innerHTML = ''; return;
+    }
+    let foundSiniestros = [];
+    if (currentMode === 'placa') {
+        const match = claimsDatabase.find(item => item.placa === query);
+        if (match) foundSiniestros = match.siniestros;
+    } else {
+        claimsDatabase.forEach(item => {
+            const matchSin = item.siniestros.find(s => s.numero.toUpperCase() === query);
+            if (matchSin) foundSiniestros.push(matchSin);
+        });
+    }
+    msgContainer.style.display = 'flex';
+    if (foundSiniestros.length > 0) {
+        const icon = `<svg style="width:1.25rem;height:1.25rem;color:#059669;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>`;
+        msgEl.innerHTML = currentMode === 'placa'
+            ? `${icon}<span style="color:#047857;font-weight:500;">Placa registrada. ${foundSiniestros.length} expediente(s) en curso encontrados.</span>`
+            : `${icon}<span style="color:#047857;font-weight:500;">Siniestro encontrado en curso.</span>`;
+        lastFoundSiniestros = foundSiniestros;
+        activeSiniestroIndex = 0;
+        renderResults();
+    } else {
+        const icon = `<svg style="width:1.25rem;height:1.25rem;color:#e11d48;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>`;
+        msgEl.innerHTML = currentMode === 'placa'
+            ? `${icon}<span style="color:#e11d48;font-weight:500;">Placa no registrada o sin siniestros en curso.</span>`
+            : `${icon}<span style="color:#e11d48;font-weight:500;">Siniestro no registrado o cerrado.</span>`;
+        container.innerHTML = '';
+    }
+}
+
+function getBadgeStyle(status) {
+    const s = status.toUpperCase();
+    const map = {
+        "PENDIENTE POR SOLICITAR AJUSTE": "background:#fbbf24;color:#000;border-color:#f59e0b;",
+        "PENDIENTE POR AJUSTE": "background:#f97316;color:#fff;border-color:#ea580c;",
+        "PENDIENTE POR DICTAMEN": "background:#4f46e5;color:#fff;border-color:#4338ca;",
+        "PENDIENTE POR COTIZACIONES DE REPUESTOS": "background:#0891b2;color:#fff;border-color:#0e7490;",
+        "PENDIENTE POR ORDEN DE REPARACIÓN": "background:#2563eb;color:#fff;border-color:#1d4ed8;",
+        "PENDIENTE POR FACTURA DE REPARACIÓN": "background:#0d9488;color:#fff;border-color:#0f766e;",
+        "PENDIENTE POR SOLICITUD DE PAGO DE FACTURA DE REPARACIÓN": "background:#059669;color:#fff;border-color:#047857;",
+        "PENDIENTE POR COMPRAS DE REPUESTOS": "background:#e11d48;color:#fff;border-color:#be123c;",
+        "PENDIENTE POR FACTURA DE REPUESTOS": "background:#c026d3;color:#fff;border-color:#a21caf;",
+        "PENDIENTE POR SOLICITUD DE PAGO FACTURA DE COMPRA DE REPUESTOS": "background:#9333ea;color:#fff;border-color:#7e22ce;"
+    };
+    return map[s] || "background:#64748b;color:#fff;border-color:#475569;";
+}
+
+function renderResults() {
+    const container = document.getElementById('results-container');
+    const siniestros = lastFoundSiniestros;
+    const sin = siniestros[activeSiniestroIndex];
+    const isMulti = siniestros.length > 1;
+
+    // tabs
+    let tabsHtml = '';
+    if (isMulti) {
+        const tabs = siniestros.map((s, idx) => {
+            const active = idx === activeSiniestroIndex;
+            const st = active
+                ? 'background:#fff;color:#1e3a8a;font-weight:800;border-top:2px solid #cbd5e1;border-left:2px solid #cbd5e1;border-right:2px solid #cbd5e1;padding:.625rem 1.25rem .625rem 1rem;z-index:10;border-radius:.75rem .75rem 0 0;box-shadow:0 -2px 8px rgba(0,0,0,.06);font-size:.875rem;'
+                : 'background:#e2e8f0;color:#475569;font-weight:700;border-top:1px solid #cbd5e1;border-left:1px solid #cbd5e1;border-right:1px solid #cbd5e1;padding:.5rem 1rem;border-radius:.5rem .5rem 0 0;margin-bottom:-1px;font-size:.75rem;';
+            const iconColor = active ? '#2563eb' : '#94a3b8';
+            return `<div data-action="selectTab" data-index="${idx}"
+                style="${st}display:flex;align-items:center;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+                <svg style="width:1rem;height:1rem;margin-right:.5rem;color:${iconColor};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                ${s.numero}
+            </div>`;
+        }).join('');
+        tabsHtml = `<div style="display:flex;overflow-x:auto;align-items:flex-end;gap:.5rem;padding:0 .5rem;scrollbar-width:none;flex-shrink:0;">${tabs}</div>`;
+    }
+
+    // card header
+    const borderTop = isMulti ? 'border-top-left-radius:0;border-top:0;' : '';
+    const cardHeader = `
+    <div style="background:linear-gradient(135deg,#002b66 0%,#004b87 100%);${isMulti ? 'border-radius:0 .75rem 0 0;' : 'border-radius:.75rem .75rem 0 0;'}padding:.75rem 1rem;color:#fff;display:flex;align-items:center;gap:.75rem;flex-shrink:0;">
+        <div style="width:2.5rem;height:2.5rem;border-radius:.5rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg style="width:1.5rem;height:1.5rem;opacity:.9;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        </div>
+        <div>
+            <h2 style="font-size:.875rem;font-weight:900;font-family:ui-monospace,monospace;letter-spacing:.05em;line-height:1;margin:0;">${sin.numero}</h2>
+            <p style="font-size:.75rem;color:#dbeafe;display:flex;flex-wrap:wrap;gap:.5rem;margin:.25rem 0 0;font-weight:500;">
+                <span>${sin.vehiculo}</span><span style="opacity:.5;">•</span><span>Póliza: ${sin.poliza}</span><span style="opacity:.5;">•</span><span>Reg: ${sin.fechaRegistro}</span>
+            </p>
+        </div>
+    </div>`;
+
+    // ajustes
+    const ajustesHtml = sin.ajustes.map((adj, adjIdx) => {
+        const estatusArr = Array.isArray(adj.estatus) ? adj.estatus : [adj.estatus];
+        const isPendSolicitar = estatusArr.includes("PENDIENTE POR SOLICITAR AJUSTE");
+        const hasMultiDocs = adj.documentos.length > 1;
+
+        const badges = estatusArr.map(s => `
+            <div style="padding:.25rem .625rem;border-radius:.375rem;font-size:.75rem;font-weight:700;border:1px solid;display:inline-flex;align-items:center;gap:.375rem;text-transform:uppercase;${getBadgeStyle(s)}box-shadow:0 1px 2px 0 rgba(0,0,0,.05);">
+                <span>${s}</span>
+                <span data-action="showStatusHelp" data-status="${s}" style="width:1.25rem;height:1.25rem;border-radius:9999px;background:rgba(0,0,0,.1);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;" title="Más información">
+                    <svg style="width:.875rem;height:.875rem;opacity:.9;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+            </div>`).join('');
+
+        const rows = adj.documentos.map(doc => `
+            <tr class="doc-row-${adj.id}" data-title="${doc.titulo}" style="border-top:1px solid #f1f5f9;">
+                <td style="padding:.625rem .875rem;font-weight:600;color:#1e293b;font-size:.875rem;display:flex;align-items:center;gap:.75rem;">
+                    <svg style="width:1.25rem;height:1.25rem;color:#2563eb;flex-shrink:0;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>${doc.titulo}</span>
+                </td>
+                <td style="padding:.625rem .875rem;text-align:right;width:7rem;">
+                    <button data-action="openDoc" data-title="${doc.titulo}" data-fecha="${sin.fechaRegistro}"
+                        style="color:#1d4ed8;font-weight:700;font-size:.875rem;background:#eff6ff;padding:.375rem .75rem;border-radius:.5rem;border:1px solid #bfdbfe;display:inline-flex;align-items:center;gap:.375rem;cursor:pointer;width:100%;justify-content:center;">
+                        Ver
+                        <svg style="width:1rem;height:1rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </button>
+                </td>
+            </tr>`).join('');
+
+        const filterRow = hasMultiDocs ? `
+            <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.5rem;justify-content:space-between;align-items:center;">
+                <div style="position:relative;flex:1;min-width:160px;max-width:280px;">
+                    <input type="text" data-action="filterDocs" data-adj="${adj.id}" placeholder="Buscar documento..."
+                        style="width:100%;padding:.375rem .75rem .375rem 2.25rem;background:#fff;border:1px solid #e2e8f0;border-radius:.5rem;font-size:.875rem;font-weight:500;">
+                    <svg style="position:absolute;left:.75rem;top:.5rem;width:1rem;height:1rem;color:#94a3b8;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </div>
-            </div>
+                <button data-action="sortDocs" data-adj="${adj.id}" data-order="asc"
+                    style="background:#fff;color:#334155;padding:.375rem .75rem;border-radius:.5rem;font-size:.875rem;font-weight:700;border:1px solid #e2e8f0;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);display:inline-flex;align-items:center;cursor:pointer;">
+                    A-Z <svg style="width:1rem;height:1rem;margin-left:.25rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/></svg>
+                </button>
+            </div>` : '';
 
-            <!-- Mensaje de estado -->
-            <div id="status-message-container" class="hidden items-center pt-2">
-                <span id="status-message" class="text-sm font-medium flex items-center gap-1.5"></span>
-            </div>
-        </section>
-
-        <!-- Resultados -->
-        <section id="results-container" class="flex-1 flex flex-col min-h-0 mt-3"></section>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="shrink-0 mercantil-gradient text-blue-100 py-2.5 px-4 text-center text-xs md:text-sm font-medium tracking-wide z-40 shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
-        <p>Mercantil Seguros | Consulta de Estatus de Siniestros - AutoFast / SAM</p>
-    </footer>
-
-    <!-- MODAL: Ayuda de estatus -->
-    <div id="modal-status-help" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full border border-slate-200 overflow-hidden">
-            <div class="bg-blue-50 border-b border-blue-100 px-5 py-4 flex justify-between items-start gap-3">
-                <div class="flex items-start gap-3">
-                    <svg class="w-6 h-6 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <div>
-                        <h4 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-1">Significado del Estatus</h4>
-                        <h3 id="modal-status-title" class="font-black text-sm md:text-base text-slate-900 leading-tight"></h3>
+        return `
+        <details style="background:#fff;border-radius:.75rem;border:1px solid #e2e8f0;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);overflow:hidden;" ${adjIdx === 0 ? 'open' : ''}>
+            <summary style="padding:.625rem .75rem;background:#fff;cursor:pointer;display:flex;justify-content:space-between;align-items:center;list-style:none;">
+                <div style="display:flex;align-items:center;gap:.625rem;flex:1;overflow:hidden;flex-wrap:wrap;">
+                    <div style="width:2.25rem;height:2.25rem;border-radius:.5rem;background:#f8fafc;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;color:#64748b;flex-shrink:0;">
+                        <svg style="width:1.25rem;height:1.25rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex:1;">
+                        ${!isPendSolicitar ? `<span style="font-size:.875rem;font-weight:900;color:#0f172a;font-family:ui-monospace,monospace;letter-spacing:-.025em;flex-shrink:0;">${adj.id}</span>` : ''}
+                        <div style="display:flex;flex-wrap:wrap;gap:.375rem;">${badges}</div>
                     </div>
                 </div>
-                <button data-action="closeStatusHelp" class="w-8 h-8 shrink-0 rounded-full bg-blue-100/50 flex items-center justify-center hover:bg-blue-200 transition text-blue-800">
-                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+                <svg style="width:1.25rem;height:1.25rem;color:#2563eb;flex-shrink:0;margin-left:.5rem;transition:transform .2s;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </summary>
+            <div style="padding:.5rem .75rem .75rem;border-top:1px solid #f1f5f9;background:rgba(248,250,252,.5);">
+                ${filterRow}
+                <div style="border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;overflow:hidden;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);">
+                    <table style="width:100%;text-align:left;border-collapse:collapse;">
+                        <tbody id="doc-tbody-${adj.id}">${rows}</tbody>
+                    </table>
+                </div>
             </div>
-            <div class="p-5 bg-white">
-                <p id="modal-status-desc" class="text-slate-600 text-sm md:text-base leading-relaxed font-medium"></p>
-            </div>
-            <div class="bg-slate-50 px-5 py-3 border-t border-slate-100 flex justify-end">
-                <button data-action="closeStatusHelp" class="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-lg text-sm font-bold hover:bg-slate-50 shadow-sm transition-all">
-                    Entendido
-                </button>
-            </div>
-        </div>
-    </div>
+        </details>`;
+    }).join('');
 
-    <!-- MODAL: Visor de documento -->
-    <div id="modal-doc" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-slate-200">
-            <div class="bg-slate-50 border-b border-slate-200 px-5 py-4 flex justify-between items-center">
-                <h3 id="modal-doc-title" class="font-bold text-base text-slate-800 flex items-center gap-2"></h3>
-                <button data-action="closeDoc" class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center hover:bg-slate-300 transition text-slate-600">
-                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+    // card wrapper
+    const cardBorderRadius = isMulti ? 'border-radius:0 .75rem .75rem .75rem;border-top:0;' : 'border-radius:.75rem;';
+    const html = `
+        ${tabsHtml}
+        <div style="background:#fff;${cardBorderRadius}box-shadow:0 4px 20px -2px rgba(0,0,0,.05);border:1px solid rgba(226,232,240,.8);display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
+            ${cardHeader}
+            <div style="padding:.5rem;display:flex;flex-direction:column;gap:.5rem;flex:1;min-height:0;overflow-y:auto;background:rgba(248,250,252,.8);scrollbar-width:none;">
+                ${ajustesHtml}
             </div>
-            <div id="modal-doc-body" class="p-5 overflow-y-auto flex-1 bg-white space-y-4"></div>
-            <div class="bg-slate-50 px-5 py-3 border-t border-slate-200 flex justify-end space-x-3">
-                <button data-action="printDoc" class="mercantil-gradient text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:opacity-95 shadow-sm flex items-center gap-2">
-                    <svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                    </svg>
-                    Imprimir / PDF
-                </button>
-            </div>
-        </div>
-    </div>
+        </div>`;
 
-    <script src="app.js"></script>
-</body>
-</html>
+    container.innerHTML = html;
+}
+
+function sortDocuments(adjId, btn) {
+    const tbody = document.getElementById(`doc-tbody-${adjId}`);
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const order = btn.getAttribute('data-order') || 'asc';
+    rows.sort((a, b) => order === 'asc'
+        ? b.getAttribute('data-title').localeCompare(a.getAttribute('data-title'))
+        : a.getAttribute('data-title').localeCompare(b.getAttribute('data-title')));
+    btn.setAttribute('data-order', order === 'asc' ? 'desc' : 'asc');
+    const arrow = order === 'asc'
+        ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>`
+        : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"/>`;
+    btn.innerHTML = `A-Z <svg style="width:1rem;height:1rem;margin-left:.25rem;pointer-events:none;" fill="none" stroke="currentColor" viewBox="0 0 24 24">${arrow}</svg>`;
+    rows.forEach(r => tbody.appendChild(r));
+}
+
+function showStatusHelp(status) {
+    const desc = statusDefinitions[status] || "Estatus en proceso de validación.";
+    document.getElementById('modal-status-title').innerText = status;
+    document.getElementById('modal-status-desc').innerText = desc;
+    const m = document.getElementById('modal-status-help');
+    m.style.display = 'flex';
+}
+
+function openDocModal(title, fecha) {
+    document.getElementById('modal-doc-title').innerHTML = `<svg style="width:1.25rem;height:1.25rem;color:#2563eb;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> ${title}`;
+    document.getElementById('modal-doc-body').innerHTML = `
+        <div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px solid #e2e8f0;padding-bottom:.5rem;margin-bottom:1rem;font-size:.875rem;color:#64748b;font-weight:700;letter-spacing:.025em;">
+                <span>SEGUROS MERCANTIL</span><span>Reg: ${fecha}</span>
+            </div>
+            <h4 style="font-weight:900;font-size:1rem;color:#0f172a;text-transform:uppercase;letter-spacing:.05em;line-height:1.375;margin:0 0 1rem;">${title}</h4>
+            <div style="color:#334155;font-size:.875rem;line-height:1.625;background:#f8fafc;padding:1.25rem;border-radius:.75rem;border:1px solid #e2e8f0;min-height:200px;box-shadow:inset 0 2px 4px 0 rgba(0,0,0,.06);">Documento oficial derivado del sistema Premium/AutoFast.</div>
+        </div>`;
+    document.getElementById('modal-doc').style.display = 'flex';
+}
+
+document.addEventListener('click', function(e) {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    const action = target.getAttribute('data-action');
+    if (action === 'setMode') setMode(target.getAttribute('data-mode'));
+    else if (action === 'executeSearch') executeSearch();
+    else if (action === 'clearSearch') clearSearch();
+    else if (action === 'selectTab') { activeSiniestroIndex = parseInt(target.getAttribute('data-index')); renderResults(); }
+    else if (action === 'sortDocs') sortDocuments(target.getAttribute('data-adj'), target);
+    else if (action === 'showStatusHelp') { e.preventDefault(); e.stopPropagation(); showStatusHelp(target.getAttribute('data-status')); }
+    else if (action === 'closeStatusHelp') document.getElementById('modal-status-help').style.display = 'none';
+    else if (action === 'openDoc') openDocModal(target.getAttribute('data-title'), target.getAttribute('data-fecha'));
+    else if (action === 'closeDoc') document.getElementById('modal-doc').style.display = 'none';
+    else if (action === 'printDoc') window.print();
+});
+
+document.addEventListener('keyup', function(e) {
+    if (e.target.id === 'search-input' && e.key === 'Enter') executeSearch();
+    else if (e.target.dataset.action === 'filterDocs') {
+        const adjId = e.target.dataset.adj;
+        const val = e.target.value.toLowerCase();
+        document.querySelectorAll(`.doc-row-${adjId}`).forEach(row => {
+            row.style.display = row.getAttribute('data-title').toLowerCase().includes(val) ? '' : 'none';
+        });
+    }
+});
+
+window.onload = function() { setMode('placa'); executeSearch(); };
+</script>
