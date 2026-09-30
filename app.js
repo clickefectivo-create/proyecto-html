@@ -301,7 +301,7 @@ function renderResults() {
         ${tabsHtml}
         <div style="background:#fff;${cardBorderRadius}box-shadow:0 4px 20px -2px rgba(0,0,0,.05);border:1px solid rgba(226,232,240,.8);display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;">
             ${cardHeader}
-            <div style="padding:.5rem;display:flex;flex-direction:column;gap:.5rem;flex:1;min-height:0;overflow-y:auto;background:rgba(248,250,252,.8);scrollbar-width:none;">
+            <div style="padding:.5rem;display:flex;flex-direction:column;gap:.5rem;flex:1;min-height:0;overflow-y:auto;background:rgba(248,250,252,.8);">
                 ${accordion}
             </div>
         </div>`;
