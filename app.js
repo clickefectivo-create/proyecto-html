@@ -287,7 +287,7 @@ function renderResults() {
         </summary>
         <div style="padding:.5rem .75rem .75rem;border-top:1px solid #f1f5f9;background:rgba(248,250,252,.5);">
             ${filterRow}
-            <div style="border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;overflow:hidden;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);">
+            <div style="border-radius:.75rem;border:1px solid #e2e8f0;background:#fff;overflow-y:auto;max-height:300px;box-shadow:0 1px 2px 0 rgba(0,0,0,.05);">
                 <table style="width:100%;text-align:left;border-collapse:collapse;">
                     <tbody id="doc-tbody-${adjId}">${rows}</tbody>
                 </table>
